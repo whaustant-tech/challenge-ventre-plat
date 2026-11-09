@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Challenge Ventre Plat à deux</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ventre Plat">
+<meta name="theme-color" content="#ff6b6b">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff7f0; --card:#ffffff; --ink:#2b2135; --muted:#7a6f86;
+  --coral:#ff6b6b; --mint:#2ec4a6; --mint2:#9fe5d6; --sun:#ffc145; --lav:#8b7cf6;
+  --line:#f0e4da; --miss:#ffd9d4; --shadow:0 6px 20px rgba(43,33,53,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Nunito,system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 24px) env(safe-area-inset-left);
+  -webkit-tap-highlight-color:transparent}
+.wrap{max-width:480px;margin:0 auto;padding:16px}
+h1,h2,h3{font-family:"Baloo 2",sans-serif;line-height:1.1}
+.card{background:var(--card);border-radius:24px;padding:18px;box-shadow:var(--shadow);margin-top:16px}
+
+.hero{background:linear-gradient(135deg,var(--coral),#ff9a6b 55%,var(--sun));color:#fff;border-radius:24px;padding:22px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero h1{font-size:28px;font-weight:800}
+.hero p{margin-top:6px;font-weight:600;opacity:.95;font-size:15px}
+.hero .emoji{position:absolute;right:-6px;top:-10px;font-size:84px;opacity:.25;transform:rotate(12deg)}
+.journey{margin-top:14px;background:rgba(255,255,255,.25);border-radius:999px;height:10px;overflow:hidden}
+.journey i{display:block;height:100%;background:#fff;border-radius:999px;width:0;transition:width .5s}
+.journey-l{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-top:6px;opacity:.95}
+.sync{font-size:12px;font-weight:700;margin-top:10px;opacity:.9}
+
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+.stat{background:var(--card);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
+.stat .v{font-family:"Baloo 2";font-size:30px;font-weight:800;line-height:1}
+.stat .l{font-size:12px;color:var(--muted);font-weight:700;margin-top:4px}
+
+.sess-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.navb{border:none;background:var(--line);width:42px;height:42px;border-radius:14px;font-size:18px;font-weight:800;color:var(--ink)}
+.navb:disabled{opacity:.3}
+.sess-date{text-align:center;flex:1}
+.sess-date .d{font-family:"Baloo 2";font-size:20px;font-weight:800}
+.sess-date .w{font-size:12px;color:var(--muted);font-weight:700}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;color:#fff;margin-top:14px}
+.card h2{font-size:22px;margin:8px 0 6px}
+.intro{color:var(--muted);font-size:15px;line-height:1.45}
+
+.ex{margin-top:14px;border:2px solid var(--line);border-radius:18px;padding:14px;transition:.25s}
+.ex.checked{border-color:var(--mint);background:#effbf8}
+.ex-head{display:flex;align-items:center;gap:12px}
+.ico{font-size:28px;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex-shrink:0}
+.ex h3{font-size:18px}
+.ex .meta{font-size:13px;color:var(--muted);font-weight:600}
+.ex p{font-size:14px;margin-top:8px;line-height:1.45}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{border:none;border-radius:14px;padding:12px 14px;font-weight:700;font-size:15px;font-family:Nunito;text-decoration:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.btn.play{background:#ff0033;color:#fff;flex:1;justify-content:center}
+.btn.timer{background:var(--sun);color:var(--ink);flex:1;justify-content:center}
+.btn.check{background:var(--line);color:var(--ink)}
+.btn.check:disabled{opacity:.45}
+.ex.checked .btn.check{background:var(--mint);color:#fff}
+.player{margin-top:12px;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:16/9}
+.player iframe{width:100%;height:100%;border:0;display:block}
+.backup{display:flex;gap:8px;margin-top:10px}
+.backup .btn{flex:1;justify-content:center;background:var(--card);color:var(--ink);box-shadow:var(--shadow);font-size:14px}
+.alt{display:block;font-size:12px;color:var(--muted);margin-top:8px;text-decoration:underline}
+.center{text-align:center;padding:16px 4px 4px}
+.center .big{font-size:64px}
+
+/* Calendrier de régularité */
+.cal-head,.cal-row{display:grid;grid-template-columns:52px repeat(7,1fr) 34px;gap:5px;align-items:center}
+.cal-head{font-size:11px;font-weight:800;color:var(--muted);text-align:center;margin:12px 0 6px}
+.cal-row{margin-bottom:5px}
+.wk{font-size:11px;font-weight:700;color:var(--muted);line-height:1.1}
+.wk b{display:block;color:var(--ink);font-size:12px}
+.cell{aspect-ratio:1;border-radius:9px;border:none;background:var(--line);position:relative;font-size:10px;font-weight:800;color:transparent;padding:0}
+.cell.we{background:repeating-linear-gradient(45deg,#f6efe8,#f6efe8 3px,#fbf6f1 3px,#fbf6f1 6px)}
+.cell.fut{background:#f7f1eb}
+.cell.miss{background:var(--miss)}
+.cell.half{background:var(--mint2)}
+.cell.full{background:var(--mint)}
+.cell.full::after{content:"✓";color:#fff;position:absolute;inset:0;display:grid;place-items:center;font-size:12px}
+.cell.today{box-shadow:0 0 0 2px var(--coral)}
+.cell.sel{box-shadow:0 0 0 3px var(--ink)}
+.wkscore{font-size:11px;font-weight:800;text-align:right;color:var(--muted)}
+.wkscore.perfect{color:var(--mint)}
+.month{grid-column:1/-1;font-family:"Baloo 2";font-weight:800;font-size:14px;margin:10px 0 2px;color:var(--lav)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:12px;color:var(--muted);font-weight:700}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.badge{text-align:center;padding:12px 6px;border-radius:18px;background:#f7f1eb;filter:grayscale(1);opacity:.45}
+.badge.on{background:#fff4d6;filter:none;opacity:1}
+.badge .e{font-size:30px}
+.badge .t{font-size:12px;font-weight:800;margin-top:4px}
+.badge .s{font-size:11px;color:var(--muted);font-weight:600}
+
+.tips{margin-top:16px;background:var(--ink);color:#fff;border-radius:24px;padding:18px}
+.tips h2{font-size:20px;margin-bottom:10px}
+.tips li{list-style:none;display:flex;gap:10px;margin:10px 0;font-size:14px;line-height:1.45}
+.tips li b{color:var(--sun)}
+.share{margin-top:16px;display:flex}
+.share .btn{flex:1;justify-content:center;background:var(--lav);color:#fff}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
+
+.modal{position:fixed;inset:0;background:rgba(43,33,53,.85);display:none;align-items:center;justify-content:center;z-index:9;padding:20px}
+.modal.open{display:flex}
+.tbox{background:var(--card);border-radius:28px;padding:26px;text-align:center;width:100%;max-width:340px}
+.clock{font-family:"Baloo 2";font-size:72px;font-weight:800;margin:8px 0}
+.phase{font-weight:700;font-size:18px}
+.tbox .actions{justify-content:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;transition:.3s;z-index:10;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="emoji">🔥</div>
+    <h1>Challenge Ventre Plat<br>à deux 💪❤️</h1>
+    <p>16 semaines · 80 séances · 15 min par jour du lundi au vendredi</p>
+    <div class="journey"><i id="journey"></i></div>
+    <div class="journey-l"><span>9 nov. 2026</span><span id="weekLbl">Semaine 1/16</span><span>28 févr. 2027</span></div>
+    <div class="sync">📱 Enregistré sur ce téléphone</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v" id="sDone">0<small style="font-size:16px">/80</small></div><div class="l">séances complètes</div></div>
+    <div class="stat"><div class="v" id="sReg">—</div><div class="l">régularité</div></div>
+    <div class="stat"><div class="v" id="sStreak">0 🔥</div><div class="l">série en cours (jours de séance)</div></div>
+    <div class="stat"><div class="v" id="sBest">0 🏅</div><div class="l">meilleure série</div></div>
+  </div>
+
+  <div class="card" id="session"></div>
+
+  <div class="card">
+    <h2>📅 Ma régularité</h2>
+    <p class="intro">Chaque case est un jour. Touchez-en une pour ouvrir la séance (vous pouvez rattraper un jour passé).</p>
+    <div class="cal-head"><span></span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span><span></span></div>
+    <div id="cal"></div>
+    <div class="legend">
+      <span><i style="background:var(--mint)"></i>Séance complète</span>
+      <span><i style="background:var(--mint2)"></i>À moitié</span>
+      <span><i style="background:var(--miss)"></i>Manquée</span>
+      <span><i style="background:repeating-linear-gradient(45deg,#f6efe8,#f6efe8 3px,#fbf6f1 3px,#fbf6f1 6px)"></i>Repos</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🏆 Mes badges</h2>
+    <div class="badges" id="badges"></div>
+  </div>
+
+  <div class="tips">
+    <h2>🎯 Les règles d'or</h2>
+    <ul>
+      <li><span>🦶</span><span><b>Sautez bas :</b> quelques centimètres suffisent. Atterrissez sur la pointe des pieds, genoux souples.</span></li>
+      <li><span>🫃</span><span><b>Ventre engagé :</b> ne relâchez jamais le ventre au moment de l'impact.</span></li>
+      <li><span>🚫</span><span><b>Zéro crunch :</b> pas de relevé de buste classique, ça pousse sur le dos et le périnée.</span></li>
+      <li><span>🌬️</span><span><b>On rentre en soufflant :</b> le ventre se creuse sur l'expiration.</span></li>
+      <li><span>😴</span><span><b>Samedi et dimanche :</b> repos complet, les muscles se construisent pendant la récupération.</span></li>
+      <li><span>🤝</span><span><b>À deux :</b> le premier qui rate une séance prépare le petit-déj de l'autre 😉</span></li>
+    </ul>
+  </div>
+
+  <div class="share"><button class="btn" id="shareBtn">📲 Copier le lien</button></div>
+  <div class="backup">
+    <button class="btn" id="saveBtn">💾 Copier ma sauvegarde</button>
+    <button class="btn" id="loadBtn">📥 Restaurer</button>
+  </div>
+
+  <p class="note">Vos coches sont enregistrées sur ce téléphone, dans ce navigateur. Chacun a donc son propre suivi.<br>Changement de téléphone ? « Copier ma sauvegarde », collez le code dans vos notes, puis « Restaurer » sur le nouvel appareil.<br>Hypopressifs : à faire à jeun ou à distance des repas. Enceinte, post-partum récent ou douleur ? Demandez d'abord l'avis d'un professionnel de santé.</p>
+</div>
+
+<div class="modal" id="modal">
+  <div class="tbox">
+    <div class="phase" id="phase">Prêts ?</div>
+    <div class="clock" id="clock">05:00</div>
+    <div class="meta" id="sub" style="color:var(--muted);font-weight:600"></div>
+    <div class="actions" style="margin-top:16px">
+      <button class="btn timer" id="tStart">▶ Démarrer</button>
+      <button class="btn check" id="tClose">Fermer</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="restore">
+  <div class="tbox">
+    <div class="phase">📥 Restaurer mes coches</div>
+    <p class="intro" style="margin-top:8px">Collez le code de sauvegarde ci-dessous.</p>
+    <textarea id="restoreTxt" style="width:100%;height:110px;margin-top:12px;border-radius:12px;border:2px solid var(--line);padding:10px;font-family:monospace;font-size:12px"></textarea>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn timer" id="restoreOk">Restaurer</button>
+      <button class="btn check" id="restoreClose">Annuler</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Programme ---------- */
+const yt = id => id;
+const search = q => "https://www.youtube.com/results?search_query=" + encodeURIComponent(q);
+const PROGRAM = [
+ { full:"Lundi", color:"var(--mint)", tag:"Les bases", title:"Activation du centre",
+   intro:"On démarre en douceur : on apprend à bien sauter, puis respiration et « petit up » de la méthode MCR.",
+   ex:[
+    {icon:"🪢", bg:"#fff0e0", type:"Cardio", time:"5 min", name:"Corde à sauter débutant", by:"JB Jumpingggg",
+     desc:"Réglage de la corde + séance guidée. Idéal pour apprendre sans abîmer les articulations.",
+     vid:yt("8hS-HD19qjA"), q:"JB Jumpingggg corde à sauter débutant"},
+    {icon:"🌬️", bg:"#ece9ff", type:"Ventre plat", time:"≈ 8 min", name:"La méthode MCR expliquée", by:"Valentine Roy Media",
+     desc:"Respiration, aspiration du ventre et maintien du « petit up ».",
+     vid:yt("cj3aXRwXoUM"), q:"méthode MCR respiration petit up Céline Roy"}]},
+ { full:"Mardi", color:"var(--lav)", tag:"Hypopressif", title:"Focus « stomach vacuum »",
+   intro:"Le cœur du travail profond : aspirer le ventre pour affiner la taille sans pousser vers le bas.",
+   ex:[
+    {icon:"🔥", bg:"#ffe8e8", type:"Cardio", time:"5 min", name:"5 min de corde pour perdre du poids", by:"Tibo InShape",
+     desc:"Un circuit simple, rapide et motivant pour transpirer.",
+     vid:yt("o5kBMukTtso"), q:"Tibo InShape 5 minutes corde à sauter"},
+    {icon:"🧘", bg:"#e5f8f3", type:"Ventre plat", time:"10 min", name:"Abdos hypopressifs", by:"Delphine Marie Yoga",
+     desc:"On applique la respiration : ventre plat et périnée protégé.",
+     vid:yt("2gyv1-hDAJE"), q:"Delphine Marie Yoga 10 minutes abdominaux hypopressifs"}]},
+ { full:"Mercredi", color:"var(--sun)", tag:"Doux pour les chevilles", title:"Moins d'impact, plus de profondeur",
+   intro:"On repose les chevilles : sauts sans corde (ou marche rapide sur place), puis Pilates lent et maîtrisé.",
+   ex:[
+    {icon:"🦘", bg:"#fff6dc", type:"Échauffement", time:"5 min", name:"Sauts sans corde", by:"Minuteur intégré",
+     desc:"Mimez le mouvement de la corde, ou marche rapide sur place.", timer:"free"},
+    {icon:"🤸", bg:"#ece9ff", type:"Ventre plat", time:"10 min", name:"Pilates ventre plat", by:"Pilates avec Ashley",
+     desc:"Mouvements lents, ventre toujours rentré sur l'expiration.",
+     vid:yt("BFX1kHe_dXs"), q:"Pilates avec Ashley 10 minutes ventre plat"}]},
+ { full:"Jeudi", color:"var(--coral)", tag:"Intensité", title:"Intensité & gainage",
+   intro:"On monte d'un cran ! Circuit de corde, puis gainage dynamique sans aucun crunch.",
+   ex:[
+    {icon:"⚡", bg:"#ffe8e8", type:"Cardio", time:"5 min", name:"Corde à sauter 30/30", by:"Nathan Viaud",
+     desc:"30 secondes d'effort / 30 secondes de repos.",
+     vid:yt("8q8KiXw6oF8"), q:"Nathan Viaud 5 min débutant corde à sauter", timer:"interval"},
+    {icon:"💥", bg:"#e5f8f3", type:"Ventre plat", time:"10 min", name:"Pilates abdos intensifs", by:"Jessy Pilates",
+     desc:"Gainage dynamique pour sculpter en profondeur.",
+     vid:yt("3bkHA_G8YbY"), q:"Jessy Pilates 10 min pilates abdos intensifs"}]},
+ { full:"Vendredi", color:"#ff8fb1", tag:"Finition", title:"Affiner la taille & récupérer",
+   intro:"Dernière séance de la semaine : on essore la sangle abdominale et on finit léger.",
+   ex:[
+    {icon:"🎀", bg:"#ffeaf2", type:"Cardio", time:"5 min", name:"Training corde débutant", by:"Omad Lya",
+     desc:"Un entraînement doux pour clore la semaine cardio.",
+     vid:yt("Ff-wY3oSAG4"), q:"Omad Lya training corde à sauter débutant 5 min"},
+    {icon:"🌊", bg:"#ece9ff", type:"Ventre plat", time:"11 min", name:"Abdos hypopressifs : affine ta taille", by:"CoreFlow Studio",
+     desc:"Travail très doux de fausses inspirations thoraciques.",
+     vid:yt("qJeS1fu-HpI"), q:"10 min abdos hypopressifs affine ta taille"}]}
+];
+
+/* ---------- Dates du challenge ---------- */
+const SY=2026, SM=10, SD=9;               // lundi 9 novembre 2026
+const WEEKS=16, NDAYS=WEEKS*7;            // jusqu'au dimanche 28 février 2027
+const SESSIONS=WEEKS*5;
+const MONTHS=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+const MONTHS_L=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const WD=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+const dateOf = i => new Date(SY,SM,SD+i);
+const keyOf = i => { const d=dateOf(i); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const now=new Date();
+const todayIdx = Math.round((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())-Date.UTC(SY,SM,SD))/864e5);
+const isWork = i => i%7<5;
+let sel = Math.min(Math.max(todayIdx,0),NDAYS-1);
+if(!isWork(sel) && todayIdx<NDAYS && todayIdx>=0) sel=sel; // le week-end s'affiche en repos
+
+/* ---------- État & stockage ---------- */
+const LKEY="vp-challenge-2026";
+let done={};
+try{ done=JSON.parse(localStorage.getItem(LKEY))||{} }catch(e){ done={} }
+const saveLocal=()=>{ try{ localStorage.setItem(LKEY,JSON.stringify(done)) }catch(e){} };
+function setSync(){}
+
+/* ---------- Calculs ---------- */
+const cnt = i => (done[keyOf(i)+"_0"]?1:0)+(done[keyOf(i)+"_1"]?1:0);
+const full = i => cnt(i)===2;
+
+function stats(){
+  let complete=0, eligible=0, best=0, run=0;
+  const last=Math.min(todayIdx,NDAYS-1);
+  for(let i=0;i<NDAYS;i++){
+    if(!isWork(i)) continue;
+    if(full(i)) complete++;
+    if(i<todayIdx || (i===todayIdx && full(i))) eligible+= (i<=last?1:0);
+    if(i<=last){
+      if(full(i)){ run++; best=Math.max(best,run); }
+      else if(i<todayIdx) run=0;
+    }
+  }
+  // série en cours : on remonte depuis aujourd'hui (si pas encore faite) ou depuis aujourd'hui inclus
+  let streak=0, i=Math.min(todayIdx,NDAYS-1);
+  if(i>=0 && isWork(i) && !full(i)) i--;
+  for(;i>=0;i--){ if(!isWork(i)) continue; if(full(i)) streak++; else break; }
+  const reg = eligible? Math.round(complete/eligible*100) : null;
+  return {complete,reg,streak,best:Math.max(best,streak)};
+}
+
+/* ---------- Rendu ---------- */
+function renderHeader(s){
+  const elapsed=Math.min(Math.max(todayIdx+1,0),NDAYS);
+  document.getElementById("journey").style.width=(elapsed/NDAYS*100)+"%";
+  const wk=Math.floor(Math.max(todayIdx,0)/7)+1;
+  document.getElementById("weekLbl").textContent= todayIdx<0? "Départ demain 🚀" : todayIdx>=NDAYS? "Terminé 🏁" : "Semaine "+wk+"/16";
+  document.getElementById("sDone").innerHTML=s.complete+'<small style="font-size:16px">/'+SESSIONS+'</small>';
+  document.getElementById("sReg").textContent= s.reg===null?"—":s.reg+" %";
+  document.getElementById("sStreak").textContent=s.streak+" 🔥";
+  document.getElementById("sBest").textContent=s.best+" 🏅";
+}
+
+function renderSession(){
+  const el=document.getElementById("session");
+  const d=dateOf(sel), wd=sel%7;
+  const label = sel===todayIdx? "Aujourd'hui" : sel===todayIdx-1? "Hier" : sel===todayIdx+1? "Demain" : WD[wd];
+  const nav=`<div class="sess-nav">
+    <button class="navb" id="prev" ${sel<=0?"disabled":""}>‹</button>
+    <div class="sess-date"><div class="d">${label}</div><div class="w">${WD[wd]} ${d.getDate()} ${MONTHS[d.getMonth()]} · semaine ${Math.floor(sel/7)+1}/16</div></div>
+    <button class="navb" id="next" ${sel>=NDAYS-1?"disabled":""}>›</button></div>`;
+  if(!isWork(sel)){
+    el.innerHTML=nav+`<div class="center"><div class="big">🛋️</div><h2>Repos bien mérité</h2>
+      <p class="intro">Pas de séance le week-end. Marchez, buvez de l'eau, dormez bien : c'est là que le ventre se dessine.</p></div>`;
+  } else {
+    const p=PROGRAM[wd], future=sel>todayIdx;
+    el.innerHTML=nav+`<span class="tag" style="background:${p.color}">${p.tag}</span>
+      <h2>${p.title}</h2><p class="intro">${p.intro}</p>
+      ${future?'<p class="intro" style="margin-top:8px;font-weight:700;color:var(--coral)">🔒 Séance à venir : vous pourrez la cocher le jour J.</p>':""}
+      ${p.ex.map((e,j)=>{
+        const k=keyOf(sel)+"_"+j, on=!!done[k];
+        return `<div class="ex ${on?"checked":""}">
+          <div class="ex-head"><div class="ico" style="background:${e.bg}">${e.icon}</div>
+            <div><div class="meta">${e.type} · ${e.time}</div><h3>${e.name}</h3><div class="meta">${e.by}</div></div></div>
+          <p>${e.desc}</p>
+          <div class="actions">
+            ${e.vid?`<button class="btn play" data-vid="${e.vid}" data-slot="p${j}">▶ Vidéo</button>`:""}
+            ${e.timer?`<button class="btn timer" data-timer="${e.timer}">⏱ Minuteur</button>`:""}
+            <button class="btn check" data-k="${k}" ${future?"disabled":""}>${on?"✓ Fait":"○ Fait ?"}</button>
+          </div>
+          <div id="p${j}"></div>
+          ${e.q?`<a class="alt" href="${search(e.q)}" target="_blank" rel="noopener">Vidéo indisponible ? La chercher sur YouTube</a>`:""}
+        </div>`}).join("")}`;
+  }
+  el.querySelector("#prev").onclick=()=>{sel--;render()};
+  el.querySelector("#next").onclick=()=>{sel++;render()};
+  el.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>toggle(b.dataset.k));
+  el.querySelectorAll("[data-timer]").forEach(b=>b.onclick=()=>openTimer(b.dataset.timer));
+  el.querySelectorAll("[data-vid]").forEach(b=>b.onclick=()=>{
+    const slot=el.querySelector("#"+b.dataset.slot);
+    if(slot.innerHTML){ slot.innerHTML=""; b.textContent="▶ Vidéo"; return; }
+    slot.innerHTML=`<div class="player"><iframe src="https://www.youtube-nocookie.com/embed/${b.dataset.vid}?autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`;
+    b.textContent="✕ Fermer la vidéo";
+  });
+}
+
+function renderCal(){
+  const el=document.getElementById("cal"); let h="", lastMonth=-1;
+  for(let w=0;w<WEEKS;w++){
+    const mon=dateOf(w*7);
+    // titre de mois quand une semaine contient le 1er du mois (ou la 1re semaine)
+    let mHead=null;
+    for(let k=0;k<7;k++){ const dd=dateOf(w*7+k); if(w===0&&k===0 || dd.getDate()===1){ mHead=dd; break; } }
+    if(mHead && mHead.getMonth()!==lastMonth){ lastMonth=mHead.getMonth(); h+=`<div class="cal-row"><div class="month">${MONTHS_L[lastMonth]} ${mHead.getFullYear()}</div></div>`; }
+    let ok=0;
+    h+=`<div class="cal-row"><div class="wk"><b>S${w+1}</b>${mon.getDate()} ${MONTHS[mon.getMonth()]}</div>`;
+    for(let k=0;k<7;k++){
+      const i=w*7+k; let c="cell";
+      if(!isWork(i)) c+=" we";
+      else if(i>todayIdx) c+=" fut";
+      else { const n=cnt(i); if(n===2){c+=" full";ok++} else if(n===1) c+=" half"; else if(i<todayIdx) c+=" miss"; }
+      if(i===todayIdx) c+=" today";
+      if(i===sel) c+=" sel";
+      h+=`<button class="${c}" data-i="${i}" aria-label="${keyOf(i)}"></button>`;
+    }
+    const started = w*7<=todayIdx;
+    h+=`<div class="wkscore ${ok===5?"perfect":""}">${started?ok+"/5":""}</div></div>`;
+  }
+  el.innerHTML=h;
+  el.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{
+    sel=+b.dataset.i; render();
+    document.getElementById("session").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+}
+
+function perfectWeeks(){ let n=0; for(let w=0;w<WEEKS;w++){ let ok=true; for(let k=0;k<5;k++) if(!full(w*7+k)) {ok=false;break;} if(ok) n++; } return n; }
+
+function renderBadges(s){
+  const pw=perfectWeeks();
+  const B=[
+    ["🌱","1re séance","1 séance",s.complete>=1],
+    ["⭐","Semaine parfaite","5/5 en une semaine",pw>=1],
+    ["🔥","Série de 10","10 séances d'affilée",s.best>=10],
+    ["💪","20 séances","1/4 du challenge",s.complete>=20],
+    ["🎯","Mi-parcours","40 séances",s.complete>=40],
+    ["🚀","60 séances","3/4 du challenge",s.complete>=60],
+    ["🎄","Fêtes tenues","Séance 21-31 déc.", [42,43,44,45,46,49,50,51,52,53].some(i=>full(i))],
+    ["💎","4 semaines parfaites","5/5 quatre fois",pw>=4],
+    ["🏆","Challenge bouclé","80 séances",s.complete>=80],
+  ];
+  document.getElementById("badges").innerHTML=B.map(b=>`<div class="badge ${b[3]?"on":""}"><div class="e">${b[0]}</div><div class="t">${b[1]}</div><div class="s">${b[2]}</div></div>`).join("");
+}
+
+function render(){ const s=stats(); renderHeader(s); renderSession(); renderCal(); renderBadges(s); }
+
+let lastBadges=null;
+function toggle(k){
+  if(done[k]) delete done[k]; else done[k]=true;
+  saveLocal();
+  const day=k.slice(0,10), i=[...Array(NDAYS).keys()].find(x=>keyOf(x)===day);
+  if(done[k]) toast(full(i)? "Séance complète ! 🎉" : ["Yes ! 💪","Encore un ! 🔥","Bravo ! ⭐"][Math.floor(Math.random()*3)]);
+  render();
+}
+
+/* ---------- Minuteur ---------- */
+let tInt=null, left=300, mode="free";
+const clock=document.getElementById("clock"), phase=document.getElementById("phase"), sub=document.getElementById("sub");
+const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+function paint(){
+  clock.textContent=fmt(left);
+  if(!tInt && left===300){ phase.textContent="Prêts ?"; phase.style.color="var(--ink)"; return; }
+  if(mode==="interval"){
+    const work=Math.floor((300-left)/30)%2===0;
+    phase.textContent=work?"🔥 On saute !":"😮‍💨 Récup"; phase.style.color=work?"var(--coral)":"var(--mint)";
+  } else { phase.textContent="🦘 On saute, ventre engagé !"; phase.style.color="var(--coral)"; }
+}
+function openTimer(m){
+  mode=m; left=300; clearInterval(tInt); tInt=null;
+  sub.textContent=m==="interval"?"30 s d'effort / 30 s de récup":"5 min continues, sauts bas et légers";
+  document.getElementById("tStart").textContent="▶ Démarrer";
+  paint(); document.getElementById("modal").classList.add("open");
+}
+document.getElementById("tStart").onclick=function(){
+  if(tInt){ clearInterval(tInt); tInt=null; this.textContent="▶ Reprendre"; return; }
+  this.textContent="⏸ Pause";
+  tInt=setInterval(()=>{ left--; paint();
+    if(left<=0){ clearInterval(tInt); tInt=null; left=300; phase.textContent="✅ Terminé !"; phase.style.color="var(--mint)"; document.getElementById("tStart").textContent="▶ Recommencer"; }
+  },1000);
+  paint();
+};
+document.getElementById("tClose").onclick=()=>{ clearInterval(tInt); tInt=null; document.getElementById("modal").classList.remove("open"); };
+
+function toast(t){ const e=document.getElementById("toast"); e.textContent=t; e.classList.add("show"); setTimeout(()=>e.classList.remove("show"),1500); }
+document.getElementById("shareBtn").onclick=async()=>{
+  try{ await navigator.clipboard.writeText(location.href.split("#")[0]); toast("Lien copié 📋"); }
+  catch(e){ toast("Utilisez « Partager » en haut de la page"); }
+};
+
+/* ---------- Sauvegarde ---------- */
+document.getElementById("saveBtn").onclick=async()=>{
+  const code="VP1:"+btoa(Object.keys(done).filter(k=>done[k]).join(","));
+  try{ await navigator.clipboard.writeText(code); toast("Sauvegarde copiée 📋"); }
+  catch(e){ document.getElementById("restoreTxt").value=code; document.getElementById("restore").classList.add("open"); toast("Copiez ce code"); }
+};
+document.getElementById("loadBtn").onclick=()=>{ document.getElementById("restoreTxt").value=""; document.getElementById("restore").classList.add("open"); };
+document.getElementById("restoreClose").onclick=()=>document.getElementById("restore").classList.remove("open");
+document.getElementById("restoreOk").onclick=()=>{
+  const t=document.getElementById("restoreTxt").value.trim();
+  try{
+    if(!t.startsWith("VP1:")) throw 0;
+    const keys=atob(t.slice(4)).split(",").filter(k=>/^\d{4}-\d{2}-\d{2}_[01]$/.test(k));
+    keys.forEach(k=>done[k]=true); saveLocal(); render();
+    document.getElementById("restore").classList.remove("open"); toast(keys.length+" coches restaurées ✅");
+  }catch(e){ toast("Code invalide ❌"); }
+};
+
+render();
+</script>
+</body>
+</html>
